@@ -8,3 +8,9 @@ LambdaS3Trigger::LambdaS3Trigger.Function::FunctionHandler
 LambdaTempFile::LambdaTempFile.Function::FunctionHandler
 
 LambdaWithLog::LambdaWithLog.Function::FunctionHandler"
+
+LambdaDefault
+LambdaRDS
+LambdaS3Trigger
+LambdaTempFile
+LambdaWithLog
