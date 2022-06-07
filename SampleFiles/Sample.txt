@@ -1,0 +1,20 @@
+I AM PLAIN TEXT FILE
+
+LambdaDefault::LambdaDefault.Function::FunctionHandler
+
+LambdaRDS::LambdaRDS.Function::FunctionHandler
+
+LambdaS3Trigger::LambdaS3Trigger.Function::FunctionHandler
+
+LambdaTempFile::LambdaTempFile.Function::FunctionHandler
+
+LambdaWithLog::LambdaWithLog.Function::FunctionHandler
+
+LambdaSNS::LambdaSNS.Function::FunctionHandler
+
+LambdaDefault
+LambdaRDS
+LambdaS3Trigger
+LambdaTempFile
+LambdaWithLog
+LambdaSNS
