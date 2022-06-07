@@ -1,2 +1,10 @@
-S3 Lambda - Handler
-LambdaEmpty::LambdaEmpty.Function::FunctionHandler
+
+LambdaDefault::LambdaDefault.Function::FunctionHandler
+
+LambdaRDS::LambdaRDS.Function::FunctionHandler
+
+LambdaS3Trigger::LambdaS3Trigger.Function::FunctionHandler
+
+LambdaTempFile::LambdaTempFile.Function::FunctionHandler
+
+LambdaWithLog::LambdaWithLog.Function::FunctionHandler"
