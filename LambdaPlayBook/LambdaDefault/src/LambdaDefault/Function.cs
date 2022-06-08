@@ -14,8 +14,8 @@ namespace LambdaDefault
 
     public class Function
     {
-       
 
+        SharedFunctions.S3Helper s3helper = null;
         private const string RDS = "RDS";
         private const string S3Create = "S3-CREATE";
         private const string S3Delete = "S3-DELETE";
@@ -40,16 +40,14 @@ namespace LambdaDefault
         public Function()
         {
             S3Client = new AmazonS3Client();
+            s3helper = new SharedFunctions.S3Helper("default", S3Client);
+
             BUCKET_NAME = System.Environment.GetEnvironmentVariable(BucketNameConst);
             S3_KEY = DateTime.Now.ToString("yy-MM(MMM)-dd HHmmssff").ToLower() + ".txt";
             s3content = $"The time is {DateTime.Now.ToString("MMM-dd (ddd) HHmmssff").ToLower()}";
 
             SNS_TOPIC_ARN = System.Environment.GetEnvironmentVariable(TopicARNConst);
-           
             snsClient = new AmazonSimpleNotificationServiceClient();
-            
-
-
         }
 
         /// <summary>
@@ -90,6 +88,7 @@ namespace LambdaDefault
                 {
                     case S3Create:
                         {
+                            s3helper.CreateS3Object(s3content, ref sb);
                             sb.AppendLine($"BUCKET_NAME [{BUCKET_NAME}]");
                             PutObjectRequest request = new PutObjectRequest();
                             request.BucketName = BUCKET_NAME;
@@ -136,7 +135,7 @@ namespace LambdaDefault
                     case SNSJSON:
                         {
                             sb.AppendLine($"SNS_TOPIC_ARN [{SNS_TOPIC_ARN}]");
-                            string msg = JsonConvert.SerializeObject(new TaskStatus(firstText ?? "Staging", secondText ?? ""));
+                            string msg = JsonConvert.SerializeObject(new TaskStatus(firstText ?? "Staging", secondText ?? "", "1111-000-33333"));
                             PublishRequest publishReq = new PublishRequest()
                             {
                                 TargetArn = SNS_TOPIC_ARN,

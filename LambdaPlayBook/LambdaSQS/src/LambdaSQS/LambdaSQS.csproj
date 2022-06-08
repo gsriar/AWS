@@ -16,4 +16,7 @@
     <PackageReference Include="Amazon.Lambda.SQSEvents" Version="2.1.0" />
     <PackageReference Include="AWSSDK.S3" Version="3.7.9.13" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\SharedFucntions\SharedFucntions.csproj" />
+  </ItemGroup>
 </Project>

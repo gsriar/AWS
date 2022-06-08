@@ -12,18 +12,19 @@ namespace LambdaSQS
 {
     public class Function
     {
-        IAmazonS3 S3Client { get; set; }
-        private string? BUCKET_NAME;
-        private string? S3_KEY;
-        private string? s3content;
-        private const string BucketNameConst = "BUCKET_NAME";
 
+        StringBuilder sb = new StringBuilder();
+        SharedFunctions.S3Helper s3helper;
+
+        /// <summary>
+        /// Default constructor. This constructor is used by Lambda to construct the instance. When invoked in a Lambda environment
+        /// the AWS credentials will come from the IAM role associated with the function and the AWS region will be set to the
+        /// region the Lambda function is executed in.
+        /// </summary>
         public Function()
         {
-            S3Client = new AmazonS3Client();
-            BUCKET_NAME = System.Environment.GetEnvironmentVariable(BucketNameConst);
-            S3_KEY = DateTime.Now.ToString("queue/yy-MM(MMM)-dd HHmmssff").ToLower() + ".txt";
-            s3content = $"The time is {DateTime.Now.ToString("MMM-dd (ddd) HHmmssff").ToLower()}";
+            s3helper = new SharedFunctions.S3Helper("SQS", new AmazonS3Client());
+
         }
 
         /// <summary>
@@ -49,17 +50,7 @@ namespace LambdaSQS
             {
                 context.Logger.LogInformation($"Queue Message Body [{message.Body}]");
 
-                sb.AppendLine($"BUCKET_NAME [{BUCKET_NAME}]");
-                PutObjectRequest request = new PutObjectRequest();
-                request.BucketName = BUCKET_NAME;
-                request.Key = S3_KEY;
-                request.ContentBody = message.Body;
-                request.ContentType = "text/plain";
-
-                sb.AppendLine($"Try Put S3");
-                var response = S3Client.PutObjectAsync(request);
-                sb.AppendLine($"S3 Action Create [{request.BucketName}] Key: [{request.Key}], response HttpStatusCode [{response.Result.HttpStatusCode}], VersionId [{response.Result.VersionId}]");
-                sb.AppendLine($"Created S3 Object");
+                s3helper.CreateS3Object(message.Body, ref sb);
             }
             catch (Exception ex)
             {

@@ -4,11 +4,12 @@ namespace LambdaDefault
 {
     public class TaskStatus
     {
-        public TaskStatus(string name, string status)
+        public TaskStatus(string name, string status, string batchID)
         {
             this.Status = status;
             this.Name = name;
-            @default = "Empty Content";
+            @default = $"{this.Name} | {this.Status}";
+            BatchID = batchID;
         }
         public string @default
         {
@@ -23,6 +24,12 @@ namespace LambdaDefault
         }
 
         public string Status
+        {
+            get;
+            set;
+        }
+
+        public string BatchID
         {
             get;
             set;

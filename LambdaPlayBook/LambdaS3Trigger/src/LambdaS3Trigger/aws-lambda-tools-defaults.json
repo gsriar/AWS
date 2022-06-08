@@ -21,7 +21,7 @@
     "function-subnets"      : "",
     "function-security-groups" : "",
     "tracing-mode"             : "PassThrough",
-    "environment-variables"    : "",
+    "environment-variables"    : "\"BUCKET_NAME\"=\"mybucket-07jun22-1\"",
     "image-tag"                : "",
     "function-description"     : ""
 }
