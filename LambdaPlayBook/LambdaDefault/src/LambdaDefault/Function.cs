@@ -136,7 +136,7 @@ namespace LambdaDefault
                     case SNSJSON:
                         {
                             sb.AppendLine($"SNS_TOPIC_ARN [{SNS_TOPIC_ARN}]");
-                            string msg = JsonConvert.SerializeObject(new TaskCompleted(firstText ?? "Staging"));
+                            string msg = JsonConvert.SerializeObject(new TaskStatus(firstText ?? "Staging", secondText ?? ""));
                             PublishRequest publishReq = new PublishRequest()
                             {
                                 TargetArn = SNS_TOPIC_ARN,

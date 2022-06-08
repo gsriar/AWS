@@ -2,12 +2,13 @@
 
 namespace LambdaDefault
 {
-    public class TaskCompleted
+    public class TaskStatus
     {
-        public TaskCompleted(string state)
+        public TaskStatus(string name, string status)
         {
-            StageComlpleted = state;
-            @default = "Default";
+            this.Status = status;
+            this.Name = name;
+            @default = "Empty Content";
         }
         public string @default
         {
@@ -15,7 +16,13 @@ namespace LambdaDefault
             set;
         }
 
-        public string StageComlpleted
+        public string Name
+        {
+            get;
+            set;
+        }
+
+        public string Status
         {
             get;
             set;
