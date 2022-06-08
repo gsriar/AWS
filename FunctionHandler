@@ -14,6 +14,13 @@ LambdaSNS::LambdaSNS.Function::FunctionHandler
 LambdaDefault
 LambdaRDS
 LambdaS3Trigger
-LambdaTempFile
-LambdaWithLog
 LambdaSNS
+LambdaSQS
+
+RDS
+S3-Create:Sample S3 Text
+S3-Delete:22-06(jun)-08 06374997.txt
+SNS-EMAIL
+SNS-JSON
+LOG
+TEMP-FILE
