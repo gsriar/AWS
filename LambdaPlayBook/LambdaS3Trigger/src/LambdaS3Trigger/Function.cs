@@ -2,6 +2,7 @@ using Amazon.Lambda.Core;
 using Amazon.Lambda.S3Events;
 using Amazon.S3;
 using Amazon.S3.Util;
+using SharedFucntions;
 using System.Text;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
@@ -34,22 +35,17 @@ namespace LambdaS3Trigger
         /// <returns></returns>
         public async Task<string?> FunctionHandler(S3Event evnt, ILambdaContext context)
         {
-            sb.Clear();
-            var s3Event = evnt.Records?[0].S3;
-            if (s3Event == null)
-            {
-                sb.AppendLine("No S3 Event data");
-            }
+            string msg = JsonHelper.JsonSerialize2<S3Event>(evnt);
+            StringBuilder sb = new StringBuilder();
             try
             {
-                var response = $"Bucket: {s3Event?.Bucket.Name}, Key : {s3Event?.Object.Key}";
-                s3helper.CreateS3Object(response, ref sb);
-
+                s3helper.CreateS3Object(msg, ref sb);
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                sb.AppendLine($"Exception: {e.Message}");
+                sb.AppendLine($"Exception [{ex.Message}]");
             }
+
             context.Logger.LogInformation(sb.ToString());
             return sb.ToString();
         }

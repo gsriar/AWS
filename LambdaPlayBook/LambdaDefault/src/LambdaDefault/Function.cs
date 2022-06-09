@@ -4,6 +4,8 @@ using Amazon.S3.Model;
 using Amazon.SimpleNotificationService;
 using Amazon.SimpleNotificationService.Model;
 using Newtonsoft.Json;
+using SharedFucntions;
+using SharedFunctions;
 using System.Text;
 
 // Assembly attribute to enable the Lambda function's JSON input to be converted into a .NET class.
@@ -16,6 +18,7 @@ namespace LambdaDefault
     {
 
         SharedFunctions.S3Helper s3helper = null;
+        private S3Helper s3Log;
         private const string RDS = "RDS";
         private const string S3Create = "S3-CREATE";
         private const string S3Delete = "S3-DELETE";
@@ -40,7 +43,10 @@ namespace LambdaDefault
         public Function()
         {
             S3Client = new AmazonS3Client();
+
             s3helper = new SharedFunctions.S3Helper("default", S3Client);
+
+            s3Log = new SharedFunctions.S3Helper("default-log-", "LOG_BUCKET_NAME", S3Client);
 
             BUCKET_NAME = System.Environment.GetEnvironmentVariable(BucketNameConst);
             S3_KEY = DateTime.Now.ToString("yy-MM(MMM)-dd HHmmssff").ToLower() + ".txt";
@@ -89,16 +95,6 @@ namespace LambdaDefault
                     case S3Create:
                         {
                             s3helper.CreateS3Object(s3content, ref sb);
-                            sb.AppendLine($"BUCKET_NAME [{BUCKET_NAME}]");
-                            PutObjectRequest request = new PutObjectRequest();
-                            request.BucketName = BUCKET_NAME;
-                            request.Key = S3_KEY;
-                            request.ContentBody = s3content;
-                            request.ContentType = "text/plain";
-                            sb.AppendLine($"Try Put S3");
-                            var response = S3Client.PutObjectAsync(request);
-                            sb.AppendLine($"S3 Action Create [{request.BucketName}] Key: [{request.Key}], response HttpStatusCode [{response.Result.HttpStatusCode}], VersionId [{response.Result.VersionId}]");
-                            sb.AppendLine($"Created S3 Object");
                         }
                         break;
 
@@ -122,7 +118,9 @@ namespace LambdaDefault
                                 Message = $"{(secondText ?? "No Email Body Content")} [{DateTime.Now.ToString("MMM-dd HH:mm:ss")}]",
                             };
 
-                            publishReq.MessageAttributes.Add("purpose", new MessageAttributeValue { StringValue = "notificationEmail", DataType = "String"});
+                            publishReq.MessageAttributes.Add("mission", new MessageAttributeValue { StringValue = "ga-aws-email-notification", DataType = "String" });
+
+                            s3Log.CreateS3Object("PublishRequest", JsonHelper.JsonSerialize2<PublishRequest>(publishReq), ref sb);
 
                             sb.AppendLine($"Try publish SNSEMAIL message");
                             var response = snsClient.PublishAsync(publishReq);
@@ -135,15 +133,30 @@ namespace LambdaDefault
                     case SNSJSON:
                         {
                             sb.AppendLine($"SNS_TOPIC_ARN [{SNS_TOPIC_ARN}]");
-                            string msg = JsonConvert.SerializeObject(new TaskStatus(firstText ?? "Staging", secondText ?? "", "1111-000-33333"));
+                            var  task= new MessageTask(firstText ?? "Staging", secondText ?? "", "1111-000-33333");
+
+                            string taskJSON = JsonHelper.JsonSerialize<MessageTask>(task);
+
+                            var _SNSJSONMessage = new SNSJSONMessage(taskJSON);
+
+                            var jsonMessage = JsonHelper.JsonSerialize<SNSJSONMessage>(_SNSJSONMessage);
+
                             PublishRequest publishReq = new PublishRequest()
                             {
                                 TargetArn = SNS_TOPIC_ARN,
                                 MessageStructure = "json",
-                                Message = msg
+                                Message = jsonMessage
                             };
 
-                            publishReq.MessageAttributes.Add("purpose", new MessageAttributeValue { StringValue = "LambdaTrigger", DataType = "String" });
+                            publishReq.MessageAttributes.Add("mission", new MessageAttributeValue { StringValue = "ga-aws-task", DataType = "String" });
+
+                            publishReq.MessageAttributes.Add("task", new MessageAttributeValue { StringValue = "staging", DataType = "String" });
+
+                            s3Log.CreateS3Object("Task", JsonHelper.JsonSerialize2<MessageTask>(task), ref sb);
+
+                            s3Log.CreateS3Object("SNSJSONMessage", JsonHelper.JsonSerialize2<SNSJSONMessage>(_SNSJSONMessage), ref sb);
+
+                            s3Log.CreateS3Object("PublishRequest", JsonHelper.JsonSerialize2<PublishRequest>(publishReq), ref sb);
 
                             sb.AppendLine($"Try publish SNSJSON message");
                             var response = snsClient.PublishAsync(publishReq);

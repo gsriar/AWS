@@ -2,6 +2,8 @@ using Amazon.Lambda.Core;
 using Amazon.Lambda.SQSEvents;
 using Amazon.S3;
 using Amazon.S3.Model;
+using SharedFucntions;
+using SharedFunctions;
 using System.Text;
 
 
@@ -35,11 +37,26 @@ namespace LambdaSQS
         /// <param name="context"></param>
         /// <returns></returns>
         public async Task FunctionHandler(SQSEvent evnt, ILambdaContext context)
-        {
-            foreach (var message in evnt.Records)
+        { 
+            string msg = JsonHelper.JsonSerialize2<SQSEvent>(evnt);
+            StringBuilder sb = new StringBuilder();
+            try
             {
-                await ProcessMessageAsync(message, context);
+                s3helper.CreateS3Object(msg, ref sb);
             }
+            catch (Exception ex)
+            {
+                sb.AppendLine($"Exception [{ex.Message}]");
+            }
+
+            context.Logger.LogInformation(sb.ToString());
+           
+            await Task.CompletedTask;
+
+            //foreach (var message in evnt.Records)
+            //{
+            //    await ProcessMessageAsync(message, context);
+            //}
         }
 
         private async Task ProcessMessageAsync(SQSEvent.SQSMessage message, ILambdaContext context)
