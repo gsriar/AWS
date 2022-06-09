@@ -5,11 +5,9 @@ LambdaRDS::LambdaRDS.Function::FunctionHandler
 
 LambdaS3Trigger::LambdaS3Trigger.Function::FunctionHandler
 
-LambdaTempFile::LambdaTempFile.Function::FunctionHandler
-
-LambdaWithLog::LambdaWithLog.Function::FunctionHandler"
-
 LambdaSNS::LambdaSNS.Function::FunctionHandler
+
+LambdaSQS::LambdaSQS.Function::FunctionHandler
 
 LambdaDefault
 LambdaRDS
@@ -20,7 +18,7 @@ LambdaSQS
 RDS
 S3-Create:Sample S3 Text
 S3-Delete:22-06(jun)-08 06374997.txt
-SNS-EMAIL
-SNS-JSON
-LOG
-TEMP-FILE
+SNS-EMAIL:Subject:Body
+SNS-JSON:FirstItem:SecondItem
+LOG:Test Log Text
+TEMP-FILE:Text written to temp file
