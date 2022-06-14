@@ -19,17 +19,20 @@ namespace LambdaDefault
 
         SharedFunctions.S3Helper s3helper = null;
         private S3Helper s3Log;
-        private const string RDS = "RDS";
-        private const string S3Create = "S3-CREATE";
-        private const string S3Delete = "S3-DELETE";
-        private const string SNSEMAIL = "SNS-EMAIL";
-        private const string SNSJSON = "SNS-JSON";
-        private const string LOG = "LOG";
-        private const string TempFile = "TEMP-FILE";
-        private const string BucketNameConst = "BUCKET_NAME";
-        private const string TopicARNConst = "SNS_TOPIC_ARN";
-        private const string ConnStringConst = "CONNECTION-STRING-CONST";
-     
+        private const string CaseRDS = "RDS";
+        private const string CaseS3Create = "S3-CREATE";
+        private const string CaseS3Read = "S3-READ";
+        private const string CaseS3Delete = "S3-DELETE";
+        private const string CaseSNSEMAIL = "SNS-EMAIL";
+        private const string CaseSNSJSON = "SNS-JSON";
+        private const string CaseLOG = "LOG";
+        private const string CaseTempFile = "TEMP-FILE";
+
+        private const string EnvBucketNameConst = "BUCKET_NAME";
+        private const string EnvTopicARNConst = "SNS_TOPIC_ARN";
+        private const string EnvConnStringConst = "CONNECTION_STRING";
+        private const string EnvLogBucketNameConst = "LOG_BUCKET_NAME";
+
         private string? SNS_TOPIC_ARN;
         
        
@@ -46,13 +49,13 @@ namespace LambdaDefault
 
             s3helper = new SharedFunctions.S3Helper("default", S3Client);
 
-            s3Log = new SharedFunctions.S3Helper("default-log-", "LOG_BUCKET_NAME", S3Client);
+            s3Log = new SharedFunctions.S3Helper("default-log-", EnvLogBucketNameConst, S3Client);
 
-            BUCKET_NAME = System.Environment.GetEnvironmentVariable(BucketNameConst);
+            BUCKET_NAME = System.Environment.GetEnvironmentVariable(EnvBucketNameConst);
             S3_KEY = DateTime.Now.ToString("yy-MM(MMM)-dd HHmmssff").ToLower() + ".txt";
             s3content = $"The time is {DateTime.Now.ToString("MMM-dd (ddd) HHmmssff").ToLower()}";
 
-            SNS_TOPIC_ARN = System.Environment.GetEnvironmentVariable(TopicARNConst);
+            SNS_TOPIC_ARN = System.Environment.GetEnvironmentVariable(EnvTopicARNConst);
             snsClient = new AmazonSimpleNotificationServiceClient();
         }
 
@@ -67,7 +70,7 @@ namespace LambdaDefault
             StringBuilder sb=new StringBuilder();
             try
             {
-                sb.AppendLine(String.Join(" | ", "Expected Environment Variables", BucketNameConst, TopicARNConst, ConnStringConst));
+                sb.AppendLine(String.Join(" | ", "Expected Environment Variables", EnvBucketNameConst, EnvTopicARNConst, EnvConnStringConst));
                 var result = (input ?? "No Input");
 
                 var args = result.Split(':');
@@ -92,13 +95,13 @@ namespace LambdaDefault
 
                 switch (commmand)
                 {
-                    case S3Create:
+                    case CaseS3Create:
                         {
-                            s3helper.CreateS3Object(s3content, ref sb);
+                            s3helper.CreateS3Object(s3content??"", ref sb);
                         }
                         break;
 
-                    case S3Delete:
+                    case CaseS3Delete:
                         {
                             sb.AppendLine($"Try delete S3 - DeleteObjectAsync ");
                             var response = S3Client.DeleteObjectAsync(BUCKET_NAME, firstText);
@@ -108,7 +111,14 @@ namespace LambdaDefault
                         }
                         break;
 
-                    case SNSEMAIL:
+                    case CaseS3Read:
+                        {
+                            sb.AppendLine($"Try download from s3 ");
+                            s3Log.ReadS3Object(args[1], ref sb);
+                            sb.AppendLine($"Done ");
+                        }
+                        break;
+                    case CaseSNSEMAIL:
                         {
                             sb.AppendLine($"SNS_TOPIC_ARN [{SNS_TOPIC_ARN}]");
                             PublishRequest publishReq = new PublishRequest()
@@ -123,14 +133,15 @@ namespace LambdaDefault
                             s3Log.CreateS3Object("PublishRequest", JsonHelper.JsonSerialize2<PublishRequest>(publishReq), ref sb);
 
                             sb.AppendLine($"Try publish SNSEMAIL message");
-                            var response = snsClient.PublishAsync(publishReq);
+                            var response =  snsClient.PublishAsync(publishReq);
+                            sb.AppendLine("SNS Message Pushed");
 
                             sb.AppendLine($"SNS[{publishReq.TargetArn}]Message [{publishReq.Message}] created, response HttpStatusCode [{response.Result.HttpStatusCode}]");
                             sb.AppendLine($"published SNS message");
                         }
                         break;
 
-                    case SNSJSON:
+                    case CaseSNSJSON:
                         {
                             sb.AppendLine($"SNS_TOPIC_ARN [{SNS_TOPIC_ARN}]");
                             var  task= new MessageTask(firstText ?? "Staging", secondText ?? "", "1111-000-33333");
@@ -151,6 +162,9 @@ namespace LambdaDefault
                             publishReq.MessageAttributes.Add("mission", new MessageAttributeValue { StringValue = "ga-aws-task", DataType = "String" });
 
                             publishReq.MessageAttributes.Add("task", new MessageAttributeValue { StringValue = "staging", DataType = "String" });
+                            sb.AppendLine($"Try publish SNSJSON message");
+                            var response = snsClient.PublishAsync(publishReq);
+                            sb.AppendLine("SNS Message Pushed");
 
                             s3Log.CreateS3Object("Task", JsonHelper.JsonSerialize2<MessageTask>(task), ref sb);
 
@@ -158,15 +172,14 @@ namespace LambdaDefault
 
                             s3Log.CreateS3Object("PublishRequest", JsonHelper.JsonSerialize2<PublishRequest>(publishReq), ref sb);
 
-                            sb.AppendLine($"Try publish SNSJSON message");
-                            var response = snsClient.PublishAsync(publishReq);
+                            
 
                             sb.AppendLine($"SNS[{publishReq.TargetArn}]Message [{publishReq.Message}] created, response HttpStatusCode [{response.Result.HttpStatusCode}]");
                             sb.AppendLine($"published SNS message");
                         }
                         break;
 
-                    case LOG:
+                    case CaseLOG:
                         {
                             context.Logger.LogInformation(firstText ?? "No Log Text");
 
@@ -175,7 +188,7 @@ namespace LambdaDefault
 
                         break;
 
-                    case TempFile:
+                    case CaseTempFile:
                         {
                             var path = System.IO.Path.Combine($"/tmp/file.txt");
                             FileInfo fi = new FileInfo(path);
@@ -186,14 +199,14 @@ namespace LambdaDefault
 
                         break;
 
-                    case RDS:
+                    case CaseRDS:
                         {
                             sb.AppendLine($"Start LambdaRDS");
                             string? myConnectionString = null;
                             try
                             {
-                                myConnectionString = firstText ?? System.Environment.GetEnvironmentVariable(ConnStringConst);
-                                sb.AppendLine($"EnvironmentVariable cstr : [{myConnectionString}]");
+                                myConnectionString = System.Environment.GetEnvironmentVariable(EnvConnStringConst);
+                                sb.AppendLine($"Connection String : [{myConnectionString}]");
                                 MySql.Data.MySqlClient.MySqlConnection conn = new MySql.Data.MySqlClient.MySqlConnection();
 
                                 sb.AppendLine($"new MySql.Data.MySqlClient.MySqlConnection()");
