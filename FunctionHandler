@@ -33,8 +33,4 @@ LambdaSQS
 
 "TEMP-FILE:Text written to temp file"
 
-"S3-Delete:Sample
-S3-Create:Sample S3 Text
-SNS-JSON:FirstItem:SecondItem
-LOG:Test Log Text
-TEMP-FILE:Text written to temp file"
+"S3-Delete:Sample~S3-Create:Sample S3 Text~SNS-JSON:FirstItem:SecondItem~LOG:Test Log Text~TEMP-FILE:Text written to temp file"
