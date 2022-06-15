@@ -23,7 +23,7 @@ namespace LambdaSNS
         /// </summary>
         public Function()
         {
-            s3helper = new SharedFunctions.S3Helper("SNS", new AmazonS3Client());
+            s3helper = new SharedFunctions.S3Helper("SNS", Constants.S3LogBucket, new AmazonS3Client());
 
         }
 

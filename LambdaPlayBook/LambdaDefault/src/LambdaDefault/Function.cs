@@ -42,16 +42,15 @@ namespace LambdaDefault
         {
             S3Client = new AmazonS3Client();
 
-            s3helper = new SharedFunctions.S3Helper("default", S3Client);
-
             s3Log = new SharedFunctions.S3Helper("default-log-", Constants.S3LogBucket, S3Client);
-
          
             S3_KEY = DateTime.Now.ToString("yy-MM(MMM)-dd HHmmssff").ToLower() + ".txt";
             s3content = $"The time is {DateTime.Now.ToString("MMM-dd (ddd) HHmmssff").ToLower()}";
 
             snsClient = new AmazonSimpleNotificationServiceClient();
         }
+
+        StringBuilder sb = new StringBuilder();
 
         /// <summary>
         /// A simple function that takes a string and does a ToUpper
@@ -61,10 +60,25 @@ namespace LambdaDefault
         /// <returns></returns>
         public string FunctionHandler(string input, ILambdaContext context)
         {
-            StringBuilder sb=new StringBuilder();
+            sb.Clear();
+            var lines = input.Split("~", StringSplitOptions.RemoveEmptyEntries);
+            foreach (var line in lines)
+                 Process(line);
+
+            context.Logger.LogInformation(sb.ToString());
+
+            s3Log.CreateS3Object("verbose", sb.ToString(), ref sb);
+
+            return sb.ToString();
+
+        }
+
+        private void Process(string input)
+        {
+        
             try
             {
-                sb.AppendLine(String.Join(" | ", "Expected Environment Variables", Constants.S3MainBucket, Constants.SnsTopicARN    , Constants.ConnectionString, Constants.S3LogBucket));
+                sb.AppendLine(String.Join(" | ", "Expected Environment Variables", Constants.S3MainBucket, Constants.SnsTopicARN, Constants.ConnectionString, Constants.S3LogBucket));
                 var result = (input ?? "No Input");
 
                 var args = result.Split(':');
@@ -91,7 +105,7 @@ namespace LambdaDefault
                 {
                     case CaseS3Create:
                         {
-                            s3helper.CreateS3Object(s3content??"", ref sb);
+                            s3Log.CreateS3Object(s3content ?? "", ref sb);
                         }
                         break;
 
@@ -127,7 +141,7 @@ namespace LambdaDefault
                             s3Log.CreateS3Object("PublishRequest", JsonHelper.JsonSerialize2<PublishRequest>(publishReq), ref sb);
 
                             sb.AppendLine($"Try publish SNSEMAIL message");
-                            var response =  snsClient.PublishAsync(publishReq);
+                            var response = snsClient.PublishAsync(publishReq);
                             sb.AppendLine("SNS Message Pushed");
 
                             sb.AppendLine($"SNS[{publishReq.TargetArn}]Message [{publishReq.Message}] created, response HttpStatusCode [{response.Result.HttpStatusCode}]");
@@ -138,7 +152,7 @@ namespace LambdaDefault
                     case CaseSNSJSON:
                         {
                             sb.AppendLine($"SNS_TOPIC_ARN [{Constants.SnsTopicARN}]");
-                            var  task= new MessageTask(firstText ?? "Staging", secondText ?? "", "1111-000-33333");
+                            var task = new MessageTask(firstText ?? "Staging", secondText ?? "", "1111-000-33333");
 
                             string taskJSON = JsonHelper.JsonSerialize<MessageTask>(task);
 
@@ -166,7 +180,7 @@ namespace LambdaDefault
 
                             s3Log.CreateS3Object("PublishRequest", JsonHelper.JsonSerialize2<PublishRequest>(publishReq), ref sb);
 
-                            
+
 
                             sb.AppendLine($"SNS[{publishReq.TargetArn}]Message [{publishReq.Message}] created, response HttpStatusCode [{response.Result.HttpStatusCode}]");
                             sb.AppendLine($"published SNS message");
@@ -175,8 +189,7 @@ namespace LambdaDefault
 
                     case CaseLOG:
                         {
-                            context.Logger.LogInformation(firstText ?? "No Log Text");
-
+                         
                             sb.AppendLine($"Log Sent");
                         }
 
@@ -199,7 +212,7 @@ namespace LambdaDefault
                             string? myConnectionString = null;
                             try
                             {
-                            
+
                                 sb.AppendLine($"Connection String : [{Constants.ConnectionString}]");
                                 MySql.Data.MySqlClient.MySqlConnection conn = new MySql.Data.MySqlClient.MySqlConnection();
 
@@ -223,9 +236,7 @@ namespace LambdaDefault
                 sb.AppendLine($"Exception [{ex.Message}]");
             }
 
-            context.Logger.LogInformation(sb.ToString());
-            return sb.ToString();
-
+            
         }
     }
 }

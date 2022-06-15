@@ -23,5 +23,5 @@
     "tracing-mode"             : "PassThrough",
     "image-tag"                : "",
     "function-description"     : "",
-    "environment-variables"    : "\"LOG_BUCKET_NAME\"=\"mybucket-08jun22-log\";\"SNS_TOPIC_ARN\"=\"arn:aws:sns:ap-south-1:861924898355:myTopic\";\"BUCKET_NAME\"=\"mybucket-07jun22-1\""
+    "environment-variables"    : "\"CONNECTION_STRING\"=\"none\";\"SNS_TOPIC_ARN\"=\"arn:aws:sns:ap-south-1:861924898355:myTopic\";\"S3_MAIN_BUCKET\"=\"mybucket-07jun22-1\";\"S3_log_BUCKET\"=\"mybucket-08jun22-log\""
 }

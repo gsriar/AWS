@@ -25,7 +25,7 @@ namespace LambdaSQS
         /// </summary>
         public Function()
         {
-            s3helper = new SharedFunctions.S3Helper("SQS", new AmazonS3Client());
+            s3helper = new SharedFunctions.S3Helper("SQS", Constants.S3LogBucket, new AmazonS3Client());
 
         }
 

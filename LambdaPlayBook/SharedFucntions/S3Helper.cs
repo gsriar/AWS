@@ -13,15 +13,6 @@ namespace SharedFunctions
 
         private string s3Prefix;
       
-
-        public S3Helper(string s3Prefix, IAmazonS3 s3Client)
-        {
-            s3Client = new AmazonS3Client();
-            bucketName = Constants.S3LogBucket;
-            this.s3Prefix = s3Prefix;
-            this.S3Client = s3Client;
-        }
-
         public S3Helper(string s3Prefix,string bucketName, IAmazonS3 s3Client)
         {
             s3Client = new AmazonS3Client();

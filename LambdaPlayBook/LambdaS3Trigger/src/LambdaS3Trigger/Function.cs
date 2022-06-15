@@ -22,7 +22,7 @@ namespace LambdaS3Trigger
         /// </summary>
         public Function()
         {
-            s3helper = new SharedFunctions.S3Helper("S3", new AmazonS3Client());
+            s3helper = new SharedFunctions.S3Helper("S3", Constants.S3LogBucket, new AmazonS3Client());
         }
 
 
