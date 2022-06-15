@@ -30,3 +30,5 @@ LambdaSQS
 "LOG:Test Log Text"
 
 "TEMP-FILE:Text written to temp file"
+
+LambdaCoreAPI::LambdaCoreAPI.LambdaEntryPoint::FunctionHandlerAsync
