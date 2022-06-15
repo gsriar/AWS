@@ -47,7 +47,8 @@ namespace LambdaS3Trigger
             }
 
             context.Logger.LogInformation(sb.ToString());
-            return sb.ToString();
+            await Task.CompletedTask;
+            return  sb.ToString();
         }
     }
 }

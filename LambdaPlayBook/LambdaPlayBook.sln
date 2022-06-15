@@ -9,9 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LambdaDefault", "LambdaDefa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LambdaSNS", "LambdaSNS\src\LambdaSNS\LambdaSNS.csproj", "{2C955372-E49B-4C23-AFCB-6AF09B698C0A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LambdaSQS", "LambdaSQS\src\LambdaSQS\LambdaSQS.csproj", "{9010663A-0EC6-4842-9F51-C68763D256A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "LambdaSQS", "LambdaSQS\src\LambdaSQS\LambdaSQS.csproj", "{9010663A-0EC6-4842-9F51-C68763D256A3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SharedFucntions", "SharedFucntions\SharedFucntions.csproj", "{221DBB9D-BD98-478C-956C-3AB23EDE4F80}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharedFucntions", "SharedFucntions\SharedFucntions.csproj", "{221DBB9D-BD98-478C-956C-3AB23EDE4F80}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LambdaCoreAPI", "LambdaCoreAPI\src\LambdaCoreAPI\LambdaCoreAPI.csproj", "{27D8A354-A52B-46AC-A78E-12C5E4AA22F0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{221DBB9D-BD98-478C-956C-3AB23EDE4F80}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{221DBB9D-BD98-478C-956C-3AB23EDE4F80}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{221DBB9D-BD98-478C-956C-3AB23EDE4F80}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27D8A354-A52B-46AC-A78E-12C5E4AA22F0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27D8A354-A52B-46AC-A78E-12C5E4AA22F0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27D8A354-A52B-46AC-A78E-12C5E4AA22F0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27D8A354-A52B-46AC-A78E-12C5E4AA22F0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

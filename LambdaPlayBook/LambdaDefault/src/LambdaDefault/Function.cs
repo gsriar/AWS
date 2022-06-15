@@ -28,18 +28,13 @@ namespace LambdaDefault
         private const string CaseLOG = "LOG";
         private const string CaseTempFile = "TEMP-FILE";
 
-        private const string EnvBucketNameConst = "BUCKET_NAME";
-        private const string EnvTopicARNConst = "SNS_TOPIC_ARN";
-        private const string EnvConnStringConst = "CONNECTION_STRING";
-        private const string EnvLogBucketNameConst = "LOG_BUCKET_NAME";
 
-        private string? SNS_TOPIC_ARN;
         
        
         private AmazonSimpleNotificationServiceClient snsClient;
 
         IAmazonS3 S3Client { get; set; }
-        private string? BUCKET_NAME;
+  
         private string? S3_KEY;
         private string? s3content;
 
@@ -49,13 +44,12 @@ namespace LambdaDefault
 
             s3helper = new SharedFunctions.S3Helper("default", S3Client);
 
-            s3Log = new SharedFunctions.S3Helper("default-log-", EnvLogBucketNameConst, S3Client);
+            s3Log = new SharedFunctions.S3Helper("default-log-", Constants.S3LogBucket, S3Client);
 
-            BUCKET_NAME = System.Environment.GetEnvironmentVariable(EnvBucketNameConst);
+         
             S3_KEY = DateTime.Now.ToString("yy-MM(MMM)-dd HHmmssff").ToLower() + ".txt";
             s3content = $"The time is {DateTime.Now.ToString("MMM-dd (ddd) HHmmssff").ToLower()}";
 
-            SNS_TOPIC_ARN = System.Environment.GetEnvironmentVariable(EnvTopicARNConst);
             snsClient = new AmazonSimpleNotificationServiceClient();
         }
 
@@ -70,7 +64,7 @@ namespace LambdaDefault
             StringBuilder sb=new StringBuilder();
             try
             {
-                sb.AppendLine(String.Join(" | ", "Expected Environment Variables", EnvBucketNameConst, EnvTopicARNConst, EnvConnStringConst));
+                sb.AppendLine(String.Join(" | ", "Expected Environment Variables", Constants.S3MainBucket, Constants.SnsTopicARN    , Constants.ConnectionString, Constants.S3LogBucket));
                 var result = (input ?? "No Input");
 
                 var args = result.Split(':');
@@ -104,9 +98,9 @@ namespace LambdaDefault
                     case CaseS3Delete:
                         {
                             sb.AppendLine($"Try delete S3 - DeleteObjectAsync ");
-                            var response = S3Client.DeleteObjectAsync(BUCKET_NAME, firstText);
+                            var response = S3Client.DeleteObjectAsync(Constants.S3LogBucket, firstText);
 
-                            sb.AppendLine($"S3 Action Delete [{BUCKET_NAME}] Key: [{firstText}], response HttpStatusCode [{response.Result.HttpStatusCode}], VersionId [{response.Result.VersionId}]");
+                            sb.AppendLine($"S3 Action Delete [{Constants.S3LogBucket}] Key: [{firstText}], response HttpStatusCode [{response.Result.HttpStatusCode}], VersionId [{response.Result.VersionId}]");
                             sb.AppendLine($"delete S3 Object , HttpStatusCode [{response.Result.HttpStatusCode}]");
                         }
                         break;
@@ -120,10 +114,10 @@ namespace LambdaDefault
                         break;
                     case CaseSNSEMAIL:
                         {
-                            sb.AppendLine($"SNS_TOPIC_ARN [{SNS_TOPIC_ARN}]");
+                            sb.AppendLine($"SNS_TOPIC_ARN [{Constants.SnsTopicARN}]");
                             PublishRequest publishReq = new PublishRequest()
                             {
-                                TargetArn = SNS_TOPIC_ARN,
+                                TargetArn = Constants.SnsTopicARN,
                                 Subject = $"{(firstText ?? $"No Subject")} [{DateTime.Now.ToString("MMM-dd HH:mm:ss")}]",
                                 Message = $"{(secondText ?? "No Email Body Content")} [{DateTime.Now.ToString("MMM-dd HH:mm:ss")}]",
                             };
@@ -143,7 +137,7 @@ namespace LambdaDefault
 
                     case CaseSNSJSON:
                         {
-                            sb.AppendLine($"SNS_TOPIC_ARN [{SNS_TOPIC_ARN}]");
+                            sb.AppendLine($"SNS_TOPIC_ARN [{Constants.SnsTopicARN}]");
                             var  task= new MessageTask(firstText ?? "Staging", secondText ?? "", "1111-000-33333");
 
                             string taskJSON = JsonHelper.JsonSerialize<MessageTask>(task);
@@ -154,7 +148,7 @@ namespace LambdaDefault
 
                             PublishRequest publishReq = new PublishRequest()
                             {
-                                TargetArn = SNS_TOPIC_ARN,
+                                TargetArn = Constants.SnsTopicARN,
                                 MessageStructure = "json",
                                 Message = jsonMessage
                             };
@@ -205,8 +199,8 @@ namespace LambdaDefault
                             string? myConnectionString = null;
                             try
                             {
-                                myConnectionString = System.Environment.GetEnvironmentVariable(EnvConnStringConst);
-                                sb.AppendLine($"Connection String : [{myConnectionString}]");
+                            
+                                sb.AppendLine($"Connection String : [{Constants.ConnectionString}]");
                                 MySql.Data.MySqlClient.MySqlConnection conn = new MySql.Data.MySqlClient.MySqlConnection();
 
                                 sb.AppendLine($"new MySql.Data.MySqlClient.MySqlConnection()");
